@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include "hardware/adc.h"
 
-#include "hc05.h"
+#include "hc06.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -117,10 +117,11 @@ void adc_2_task(void *p) {
     }
 }
 
-void hc05_task2(void *p) {
-    uart_init(hc05_UART_ID, hc05_BAUD_RATE);
-    gpio_set_function(hc05_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(hc05_RX_PIN, GPIO_FUNC_UART);
+void HC06_task2(void *p) {
+    uart_init(HC06_UART_ID, HC06_BAUD_RATE);
+    gpio_set_function(HC06_TX_PIN, GPIO_FUNC_UART);
+    gpio_set_function(HC06_RX_PIN, GPIO_FUNC_UART);
+    hc06_init("ChanceBall", "1234");
 
     info data;
 
@@ -254,17 +255,17 @@ void hc05_task2(void *p) {
     }
 }
 
-void hc05_task(void *p) {
-    uart_init(hc05_UART_ID, hc05_BAUD_RATE);
-    gpio_set_function(hc05_TX_PIN, GPIO_FUNC_UART);
-    gpio_set_function(hc05_RX_PIN, GPIO_FUNC_UART);
-    hc05_init("aps2_2D3Y", "4242");
+// void HC06_task(void *p) {
+//     uart_init(HC06_UART_ID, HC06_BAUD_RATE);
+//     gpio_set_function(HC06_TX_PIN, GPIO_FUNC_UART);
+//     gpio_set_function(HC06_RX_PIN, GPIO_FUNC_UART);
+//     hc06_init("aps2_2D3Y", "4242");
 
-    while (true) {
-        uart_puts(hc05_UART_ID, "OLAAA ");
-        vTaskDelay(pdMS_TO_TICKS(100));
-    }
-}
+//     while (true) {
+//         uart_puts(HC06_UART_ID, "OLAAA ");
+//         vTaskDelay(pdMS_TO_TICKS(100));
+//     }
+// }
 
 int main() {
     stdio_init_all();
@@ -310,7 +311,7 @@ int main() {
 
     xTaskCreate(adc_1_task, "ADC_Task 1", 4096, NULL, 1, NULL);
     xTaskCreate(adc_2_task, "ADC_Task 2", 4096, NULL, 1, NULL);
-    xTaskCreate(hc05_task2, "UART_Task 1", 4096, NULL, 1, NULL);
+    xTaskCreate(HC06_task2, "UART_Task 1", 4096, NULL, 1, NULL);
 
     vTaskStartScheduler();
 
