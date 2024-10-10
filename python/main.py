@@ -1,21 +1,8 @@
 import serial
-import uinput
+import pyautogui
 import time
 
 ser = serial.Serial('/dev/ttyACM0', 115200)
-
-# Create new mouse device
-device = uinput.Device([
-    uinput.KEY_A,
-    uinput.KEY_D,
-    uinput.KEY_W,
-    uinput.KEY_S,
-    uinput.KEY_Z,
-    uinput.KEY_X,
-    uinput.KEY_C,
-    uinput.KEY_V,
-])
-
 
 def parse_data(data):
     axis = data[0]  # 0 for X, 1 for Y
@@ -25,32 +12,46 @@ def parse_data(data):
     return axis, value
 
 def move_mouse(axis, value):
-    if axis == 0:    # X-axis
+    if axis == 0:  # X-axis (left/right movement)
         if value < 0:
-            device.emit(uinput.KEY_A, 1)
+            pyautogui.keyDown('a')
+            pyautogui.keyUp('d')
         elif value > 0:
-            device.emit(uinput.KEY_D, 1)
+            pyautogui.keyDown('d')
+            pyautogui.keyUp('a')
         else:
-            device.emit(uinput.KEY_A, 0)
-            device.emit(uinput.KEY_D, 0)
-    elif axis == 1:  # Y-axis
+            pyautogui.keyUp('a')
+            pyautogui.keyUp('d')
+    elif axis == 1:  # Y-axis (up/down movement)
         if value < 0:
-            device.emit(uinput.KEY_W, 1)
+            pyautogui.keyDown('w')
+            pyautogui.keyUp('s')
         elif value > 0:
-            device.emit(uinput.KEY_S, 1)
+            pyautogui.keyDown('s')
+            pyautogui.keyUp('w')
         else:
-            device.emit(uinput.KEY_W, 0)
-            device.emit(uinput.KEY_S, 0)
-    elif axis == 2:  # Botão 1
-        device.emit(uinput.KEY_Z, value)
-    elif axis == 3:  # Botão 2
-        device.emit(uinput.KEY_X, value)
-    elif axis == 4:  # Botão 3
-        device.emit(uinput.KEY_C, value)
-    elif axis == 5:  # Botão 4
-        device.emit(uinput.KEY_V, value)
-
-
+            pyautogui.keyUp('w')
+            pyautogui.keyUp('s')
+    elif axis == 2:  # Button 1
+        if value:
+            pyautogui.keyDown('z')
+        else:
+            pyautogui.keyUp('z')
+    elif axis == 3:  # Button 2
+        if value:
+            pyautogui.keyDown('x')
+        else:
+            pyautogui.keyUp('x')
+    elif axis == 4:  # Button 3
+        if value:
+            pyautogui.keyDown('c')
+        else:
+            pyautogui.keyUp('c')
+    elif axis == 5:  # Button 4
+        if value:
+            pyautogui.keyDown('v')
+        else:
+            pyautogui.keyUp('v')
 
 try:
     # sync package
