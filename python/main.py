@@ -2,7 +2,8 @@ import serial
 import pyautogui
 import time
 
-ser = serial.Serial('/dev/ttyACM0', 115200)
+# Ajuste do timeout para evitar bloqueios longos
+ser = serial.Serial('/dev/ttyACM0', 115200, timeout=0.01)  # Timeout curto para serial
 
 def parse_data(data):
     axis = data[0]  # 0 for X, 1 for Y
@@ -57,17 +58,12 @@ try:
     # sync package
     while True:
         print('Waiting for sync package...')
-        while True:
-            data = ser.read(1)
-            if data == b'\xff':
-                break
-            else:
-                print(f"Received error: {data}")
-
-        # Read 4 bytes from UART
-        data = ser.read(3)
-        axis, value = parse_data(data)
-        move_mouse(axis, value)
+        
+        # Leia todos os dados disponíveis na porta serial de uma vez
+        data = ser.read(4)  # Leia 4 bytes diretamente
+        if len(data) == 4 and data[0] == 0xff:  # Verifica se o pacote está sincronizado
+            axis, value = parse_data(data[1:])  # Processa os 3 bytes relevantes
+            move_mouse(axis, value)
 
 except KeyboardInterrupt:
     print("Program terminated by user")

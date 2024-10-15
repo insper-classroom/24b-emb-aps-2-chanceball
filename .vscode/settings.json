@@ -19,6 +19,8 @@
     "cmake.buildBeforeRun": true,
     "C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
     "files.associations": {
-        "semphr.h": "c"
+        "semphr.h": "c",
+        "stdlib.h": "c",
+        "math.h": "c"
     }
 }

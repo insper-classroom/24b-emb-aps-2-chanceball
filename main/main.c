@@ -42,19 +42,19 @@ void gpio_callback(uint gpio, uint32_t events){
         data.val = 1;
         if(gpio == BTN1){
             data.id = 1;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN2){
             data.id = 2;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN3){
             data.id = 3;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN4){
             data.id = 4;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
     }
     else if (events == 0x8) {
@@ -62,19 +62,19 @@ void gpio_callback(uint gpio, uint32_t events){
         data.val = 0;
         if(gpio == BTN1){
             data.id = 1;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN2){
             data.id = 2;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN3){
             data.id = 3;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
         else if(gpio == BTN4){
             data.id = 4;
-            xQueueSendFromISR(xQueueInfo, &data, 0);
+            xQueueSendFromISR(xQueueInfo, &data, 1);
         }
     }
 }
@@ -92,9 +92,9 @@ void adc_1_task(void *p) {
         info data;
         data.id = 11;
         data.val = result;
-        xQueueSend(xQueueInfo, &data, portMAX_DELAY);
+        xQueueSend(xQueueInfo, &data, 1);
         
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
 }
 
@@ -111,9 +111,9 @@ void adc_2_task(void *p) {
         info data;
         data.id = 12;
         data.val = result;
-        xQueueSend(xQueueInfo, &data, portMAX_DELAY);
+        xQueueSend(xQueueInfo, &data, 1);
 
-        vTaskDelay(pdMS_TO_TICKS(200));
+        vTaskDelay(pdMS_TO_TICKS(250));
     }
 }
 
@@ -121,12 +121,13 @@ void HC06_task2(void *p) {
     uart_init(HC06_UART_ID, HC06_BAUD_RATE);
     gpio_set_function(HC06_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(HC06_RX_PIN, GPIO_FUNC_UART);
-    hc06_init("ChanceBall", "1234");
+    // hc06_init("ChanceBall", "1234");
 
     info data;
 
     while (true) {
-        if(xQueueReceive(xQueueInfo, &data, pdMS_TO_TICKS(100))){
+       
+        if(xQueueReceive(xQueueInfo, &data, 0)){
             if(data.id == 1){
                 if(data.val == 1){
                     uart_putc_raw(UART_ID, 2);
@@ -217,16 +218,18 @@ void HC06_task2(void *p) {
                 if(etapa2 > -30 && etapa2 < 30){
                     etapa2 = 0;
                 }
-                sprintf(buffer, "ADC 1: %d\n", etapa2);
-                // printf(buffer);
+                else{
+                    sprintf(buffer, "ADC 1: %d\n", etapa2);
+                    // printf(buffer);
 
-                uint8_t msb = (etapa2 >> 8) & 0xFF;
-                uint8_t lsb = etapa2 & 0xFF;
+                    uint8_t msb = (etapa2 >> 8) & 0xFF;
+                    uint8_t lsb = etapa2 & 0xFF;
 
-                uart_putc_raw(UART_ID, 0);
-                uart_putc_raw(UART_ID, msb);
-                uart_putc_raw(UART_ID, lsb);
-                uart_putc_raw(UART_ID, -1); 
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, msb);
+                    uart_putc_raw(UART_ID, lsb);
+                    uart_putc_raw(UART_ID, -1); 
+                }
 
             }
             else if(data.id == 12){
@@ -238,19 +241,21 @@ void HC06_task2(void *p) {
                 if(etapa2 > -30 && etapa2 < 30){
                     etapa2 = 0;
                 }
-                sprintf(buffer, "ADC 2: %d\n", etapa2);
-                // printf(buffer);
+                else{
+                    sprintf(buffer, "ADC 2: %d\n", etapa2);
+                    // printf(buffer);
 
-                uint8_t msb = (etapa2 >> 8) & 0xFF;
-                uint8_t lsb = etapa2 & 0xFF;
+                    uint8_t msb = (etapa2 >> 8) & 0xFF;
+                    uint8_t lsb = etapa2 & 0xFF;
 
-                uart_putc_raw(UART_ID, 1);
-                uart_putc_raw(UART_ID, msb);
-                uart_putc_raw(UART_ID, lsb);
-                uart_putc_raw(UART_ID, -1); 
+                    uart_putc_raw(UART_ID, 1);
+                    uart_putc_raw(UART_ID, msb);
+                    uart_putc_raw(UART_ID, lsb);
+                    uart_putc_raw(UART_ID, -1); 
+                }
             }
 
-            vTaskDelay(pdMS_TO_TICKS(10));
+            vTaskDelay(pdMS_TO_TICKS(1));
         }
     }
 }
@@ -272,7 +277,7 @@ int main() {
 
     // printf("Start bluetooth task\n");
 
-    xQueueInfo = xQueueCreate(32, sizeof(info));
+    xQueueInfo = xQueueCreate(4, sizeof(info));
 
 
     // Initialize GPIO pins for buttons
