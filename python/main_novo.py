@@ -1,8 +1,6 @@
 import serial
-from pynput.keyboard import Key, Controller
+import pyautogui
 import time
-
-keyboard = Controller()
 
 ser = serial.Serial('COM4', 115200)
 
@@ -16,53 +14,44 @@ def parse_data(data):
 def move_mouse(axis, value):
     if axis == 0:  # X-axis (left/right movement)
         if value < 0:
-            keyboard.press('a')
-            keyboard.release('d')
+            pyautogui.keyDown('a')
+            pyautogui.keyUp('d')
         elif value > 0:
-            keyboard.press('d')
-            keyboard.release('a')
-            
+            pyautogui.keyDown('d')
+            pyautogui.keyUp('a')
         else:
-            keyboard.release('a')
-            
-            keyboard.release('d')
-            
+            pyautogui.keyUp('a')
+            pyautogui.keyUp('d')
     elif axis == 1:  # Y-axis (up/down movement)
         if value < 0:
-            keyboard.press('w')
-            
-            keyboard.release('s')
-            
+            pyautogui.keyDown('w')
+            pyautogui.keyUp('s')
         elif value > 0:
-            keyboard.press('s')
-            
-            keyboard.release('w')
-            
+            pyautogui.keyDown('s')
+            pyautogui.keyUp('w')
         else:
-            keyboard.release('s')
-            
-            keyboard.release('w')
-            
-    if axis == 2:  # Button 1
+            pyautogui.keyUp('w')
+            pyautogui.keyUp('s')
+    elif axis == 2:  # Button 1
         if value:
-            keyboard.press('z')
+            pyautogui.keyDown('z')
         else:
-            keyboard.release('z')
+            pyautogui.keyUp('z')
     elif axis == 3:  # Button 2
         if value:
-            keyboard.press('x')
+            pyautogui.keyDown('x')
         else:
-            keyboard.release('x')
+            pyautogui.keyUp('x')
     elif axis == 4:  # Button 3
         if value:
-            keyboard.press('c')
+            pyautogui.keyDown('c')
         else:
-            keyboard.release('c')
+            pyautogui.keyUp('c')
     elif axis == 5:  # Button 4
         if value:
-            keyboard.press('v')
+            pyautogui.keyDown('v')
         else:
-            keyboard.release('v')
+            pyautogui.keyUp('v')
 
 try:
     # sync package
@@ -84,7 +73,6 @@ except KeyboardInterrupt:
     print("Program terminated by user")
 except Exception as e:
     print(f"An error occurred: {e}")
-    #pass
 finally:
     ser.close()
 
