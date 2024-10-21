@@ -87,14 +87,16 @@ void adc_1_task(void *p) {
         uint16_t result;
         adc_select_input(1); // Select ADC input 1 (GPIO27)
         result = adc_read();
+        int etapa1 = result - 2048;
+        double divisor = 2047/255;
+        int etapa2 = etapa1 / divisor;
 
-        // CÓDIGO AQUI
         info data;
         data.id = 11;
-        data.val = result;
+        data.val = etapa2;
         xQueueSend(xQueueInfo, &data, 1);
-        
-        vTaskDelay(pdMS_TO_TICKS(250));
+
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -106,14 +108,16 @@ void adc_2_task(void *p) {
         uint16_t result;
         adc_select_input(0); // Select ADC input 0 (GPIO26)
         result = adc_read();
+        int etapa1 = result - 2048;
+        double divisor = 2047/255;
+        int etapa2 = etapa1 / divisor;
 
-        // CÓDIGO AQUI
         info data;
         data.id = 12;
-        data.val = result;
+        data.val = etapa2;
         xQueueSend(xQueueInfo, &data, 1);
 
-        vTaskDelay(pdMS_TO_TICKS(250));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 
@@ -121,7 +125,7 @@ void HC06_task2(void *p) {
     uart_init(HC06_UART_ID, HC06_BAUD_RATE);
     gpio_set_function(HC06_TX_PIN, GPIO_FUNC_UART);
     gpio_set_function(HC06_RX_PIN, GPIO_FUNC_UART);
-    // hc06_init("ChanceBall", "1234");
+    hc06_init("ChanceBall2", "1234");
 
     info data;
 
@@ -211,12 +215,17 @@ void HC06_task2(void *p) {
             }
             else if(data.id == 11){
                 char buffer[50];
-                int etapa1 = data.val - 2048;
-                double divisor = 2047/255;
-                int etapa2 = etapa1 / divisor;
+                int etapa2 = data.val;
 
                 if(etapa2 > -30 && etapa2 < 30){
                     etapa2 = 0;
+                }
+                
+                if(etapa2 == 0){
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, -1);
                 }
                 else{
                     sprintf(buffer, "ADC 1: %d\n", etapa2);
@@ -234,12 +243,17 @@ void HC06_task2(void *p) {
             }
             else if(data.id == 12){
                 char buffer[50];
-                int etapa1 = data.val - 2048;
-                double divisor = 2047/255;
-                int etapa2 = etapa1 / divisor;
+                int etapa2 = data.val;
 
                 if(etapa2 > -30 && etapa2 < 30){
                     etapa2 = 0;
+                }
+                
+                if(etapa2 == 0){
+                    uart_putc_raw(UART_ID, 1);
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, 0);
+                    uart_putc_raw(UART_ID, -1);
                 }
                 else{
                     sprintf(buffer, "ADC 2: %d\n", etapa2);
@@ -278,7 +292,6 @@ int main() {
     // printf("Start bluetooth task\n");
 
     xQueueInfo = xQueueCreate(4, sizeof(info));
-
 
     // Initialize GPIO pins for buttons
     gpio_init(BTN1);
